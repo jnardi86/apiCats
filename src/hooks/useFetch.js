@@ -1,50 +1,50 @@
 import React, { useState, useEffect } from 'react'
 
 
+const useFetch = (url, { initialState = null } = {}) => {
 
-const useFetch = (url, {initialState = null} = {}) => {
-    const [data, setData] = useState(initialState);
-    const [isLoading, setIsLoading] = useState();
-    const [error, setError] = useState();
-    const [refresh, setRefresh] = useState(false);
+  const [data, setData] = useState(initialState);
+  const [isLoading, setIsLoading] = useState();
+  const [error, setError] = useState();
+  const [refresh, setRefresh] = useState(false);
 
-    const refetch = () => setRefresh(!refresh);
+  const refetch = () => setRefresh(!refresh);
 
-    
-    useEffect(() => {
+  const setLocalData = (data) => setData(data);
 
-        const fetchData = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
 
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error("Algo anda mal");
-                }
-                const [data] = response.json();
-                console.log(data);
-                setData(data.url);
+  useEffect( ()=> { 
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
 
-            } catch (error) {
+      try {
+        const response = await fetch (url);
+        if(!response){
+          throw new Error ("Algo anda mal");
+        }
+        const data = await response.json();
+        setData(data);
+      } catch (error) {
+        setError("Algo anda mal");        
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-                setError("Algo anda mal!")
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    fetchData();
+  }, [refresh]);
 
-        fetchData();
 
-    }, [refresh]);
+return {
+    data,
+    isLoading,
+    error,
+    setLocalData,
+    refetch,
 
-    return {
-        data,        
-        isLoading,
-        error,
-        refetch,
-    };
- 
+}
+
 }
 
 export default useFetch
